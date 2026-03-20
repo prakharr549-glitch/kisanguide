@@ -7,7 +7,6 @@ import React, { useState } from 'react';
 import { ChevronRight, RefreshCcw, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { DISEASES } from '../constants';
-import { AdPlaceholder } from '../components/AdPlaceholder';
 
 export const DiseaseIdentifier: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -30,8 +29,6 @@ export const DiseaseIdentifier: React.FC = () => {
         <h1 className="text-3xl font-bold mb-4">Crop Disease Identifier</h1>
         <p className="text-stone-600">Identify crop diseases by symptoms and get expert solutions instantly.</p>
       </div>
-
-      <AdPlaceholder slot="disease-top" />
 
       <div className="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden min-h-[400px]">
         <div className="p-8">
@@ -124,8 +121,6 @@ export const DiseaseIdentifier: React.FC = () => {
           </AnimatePresence>
         </div>
       </div>
-
-      <AdPlaceholder slot="disease-bottom" />
     </div>
   );
 };

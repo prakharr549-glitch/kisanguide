@@ -39,7 +39,7 @@ async function startServer() {
     }
 
     const { state, district, commodity, q, limit = '20', offset = '0' } = req.query;
-    const RESOURCE_ID = '9ef84268-d588-465a-a308-a864a43d0070';
+    const RESOURCE_ID = '9ef84265-d588-465a-a308-a864a43d0070';
     const url = new URL(`https://api.data.gov.in/resource/${RESOURCE_ID}`);
     
     url.searchParams.append('api-key', API_KEY);
@@ -76,7 +76,17 @@ async function startServer() {
       }
 
       const data = await response.json();
-      console.log('Gov API Success:', { count: data.count, total: data.total });
+      console.log('Gov API Success:', { 
+        count: data.count, 
+        total: data.total,
+        hasRecords: !!data.records,
+        recordsCount: data.records?.length 
+      });
+      
+      if (!data.records || data.records.length === 0) {
+        console.warn('Gov API returned 0 records for URL:', url.toString().replace(API_KEY, 'REDACTED'));
+      }
+
       res.json(data);
     } catch (error: any) {
       console.error('Proxy internal error:', error);

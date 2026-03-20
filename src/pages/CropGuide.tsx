@@ -6,7 +6,6 @@
 import React from 'react';
 import { Calendar, CheckCircle2 } from 'lucide-react';
 import { CROP_SUGGESTIONS } from '../constants';
-import { AdPlaceholder } from '../components/AdPlaceholder';
 
 export const CropGuide: React.FC = () => {
   return (
@@ -15,8 +14,6 @@ export const CropGuide: React.FC = () => {
         <h1 className="text-3xl font-bold mb-4">Seasonal Crop Guide</h1>
         <p className="text-stone-600">Best crops to grow month-by-month in North India (UP, Bihar, Punjab, Haryana).</p>
       </div>
-
-      <AdPlaceholder slot="guide-top" />
 
       <div className="space-y-8">
         {CROP_SUGGESTIONS.map((suggestion, idx) => (
@@ -58,8 +55,6 @@ export const CropGuide: React.FC = () => {
           </div>
         ))}
       </div>
-
-      <AdPlaceholder slot="guide-bottom" />
     </div>
   );
 };

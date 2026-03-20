@@ -7,7 +7,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Tag, ArrowRight } from 'lucide-react';
 import { BLOG_POSTS } from '../constants';
-import { AdPlaceholder } from '../components/AdPlaceholder';
 
 export const Blog: React.FC = () => {
   return (
@@ -16,8 +15,6 @@ export const Blog: React.FC = () => {
         <h1 className="text-3xl font-bold mb-4">Agricultural Blog & News</h1>
         <p className="text-stone-600">Latest farming tips, crop guides, and agricultural news in Hindi and English.</p>
       </div>
-
-      <AdPlaceholder slot="blog-top" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {BLOG_POSTS.map((post) => (
@@ -52,8 +49,6 @@ export const Blog: React.FC = () => {
           </article>
         ))}
       </div>
-
-      <AdPlaceholder slot="blog-bottom" />
     </div>
   );
 };

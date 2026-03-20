@@ -6,7 +6,6 @@
 import React from 'react';
 import { FileText, CheckCircle2, Info, ArrowRight } from 'lucide-react';
 import { SCHEMES } from '../constants';
-import { AdPlaceholder } from '../components/AdPlaceholder';
 
 export const Schemes: React.FC = () => {
   return (
@@ -15,8 +14,6 @@ export const Schemes: React.FC = () => {
         <h1 className="text-3xl font-bold mb-4">Government Schemes for Farmers</h1>
         <p className="text-stone-600">Detailed information about central and state government schemes to support your farming journey.</p>
       </div>
-
-      <AdPlaceholder slot="schemes-top" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {SCHEMES.map((scheme) => (
@@ -64,8 +61,6 @@ export const Schemes: React.FC = () => {
           </div>
         ))}
       </div>
-
-      <AdPlaceholder slot="schemes-bottom" />
     </div>
   );
 };

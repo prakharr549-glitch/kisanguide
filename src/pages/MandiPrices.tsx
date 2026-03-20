@@ -6,7 +6,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, TrendingUp, TrendingDown, Minus, AlertCircle, RefreshCw, Settings, X, CheckCircle } from 'lucide-react';
 import { motion } from 'motion/react';
-import { AdPlaceholder } from '../components/AdPlaceholder';
 import { MANDI_PRICES } from '../constants';
 import { fetchMandiPrices } from '../services/mandiService';
 import { MandiPrice } from '../types';
@@ -24,7 +23,7 @@ export const MandiPrices: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
-  const ENV_API_KEY = process.env.VITE_GOV_DATA_API_KEY;
+  const ENV_API_KEY = import.meta.env.VITE_GOV_DATA_API_KEY;
   const ACTIVE_API_KEY = customApiKey || ENV_API_KEY;
 
   useEffect(() => {
@@ -45,7 +44,12 @@ export const MandiPrices: React.FC = () => {
     setError(null);
     try {
       const data = await fetchMandiPrices(selectedState, selectedDistrict, debouncedSearch, 100, 0, customApiKey);
-      setPrices(data);
+      if (data && data.length > 0) {
+        setPrices(data);
+      } else {
+        // If API returns no data, keep local data for a better UX
+        setPrices(MANDI_PRICES);
+      }
     } catch (err: any) {
       if (err.message === 'API_KEY_MISSING') {
         setError('API Key is missing. Please add it in Settings or use the "Configure API" button.');
@@ -81,11 +85,19 @@ export const MandiPrices: React.FC = () => {
     .filter(p => !selectedState || p.state === selectedState)
     .map(p => p.district))).sort();
 
-  const filteredPrices = prices.filter(p => {
-    const matchesSearch = p.crop.toLowerCase().includes(search.toLowerCase()) || 
-                         p.location.toLowerCase().includes(search.toLowerCase());
-    const matchesState = !selectedState || p.state === selectedState;
-    const matchesDistrict = !selectedDistrict || p.district === selectedDistrict;
+  const filteredPrices = (prices || []).filter(p => {
+    if (!p) return false;
+    const crop = p.crop || '';
+    const location = p.location || '';
+    const state = p.state || '';
+    const district = p.district || '';
+    const searchTerm = search.trim().toLowerCase();
+
+    const matchesSearch = !searchTerm || 
+                         crop.toLowerCase().includes(searchTerm) || 
+                         location.toLowerCase().includes(searchTerm);
+    const matchesState = !selectedState || state.toLowerCase().includes(selectedState.toLowerCase()) || selectedState.toLowerCase().includes(state.toLowerCase());
+    const matchesDistrict = !selectedDistrict || district.toLowerCase().includes(selectedDistrict.toLowerCase()) || selectedDistrict.toLowerCase().includes(district.toLowerCase());
     return matchesSearch && matchesState && matchesDistrict;
   });
 
@@ -232,8 +244,6 @@ export const MandiPrices: React.FC = () => {
         </div>
       </div>
 
-      <AdPlaceholder slot="mandi-top" />
-
       {error && (
         <div className="p-6 bg-rose-50 border border-rose-200 rounded-3xl text-rose-800">
           <div className="flex items-start gap-3">
@@ -331,7 +341,6 @@ export const MandiPrices: React.FC = () => {
             We track prices from major hubs like Azadpur (Delhi), Vashi (Mumbai), and local mandis in UP, Bihar, and Punjab.
           </p>
         </div>
-        <AdPlaceholder slot="mandi-sidebar" format="rectangle" />
       </div>
     </div>
   );

@@ -6,7 +6,6 @@
 import React, { useState } from 'react';
 import { Calculator as CalcIcon, Droplets, Wheat, TrendingUp } from 'lucide-react';
 import { motion } from 'motion/react';
-import { AdPlaceholder } from '../components/AdPlaceholder';
 
 export const Calculators: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'fertilizer' | 'seed' | 'profit' | 'water'>('fertilizer');
@@ -25,8 +24,6 @@ export const Calculators: React.FC = () => {
         <TabButton active={activeTab === 'water'} onClick={() => setActiveTab('water')} icon={Droplets} label="Irrigation" />
       </div>
 
-      <AdPlaceholder slot="calc-top" />
-
       <div className="max-w-4xl mx-auto">
         <motion.div
           key={activeTab}
@@ -40,8 +37,6 @@ export const Calculators: React.FC = () => {
           {activeTab === 'water' && <WaterCalculator />}
         </motion.div>
       </div>
-
-      <AdPlaceholder slot="calc-bottom" />
     </div>
   );
 };

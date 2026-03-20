@@ -7,7 +7,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Calculator, TrendingUp, ShieldAlert, FileText, Calendar, Lightbulb, ArrowRight, Cloud, MapPin, Wind, Droplets } from 'lucide-react';
 import { motion } from 'motion/react';
-import { AdPlaceholder } from '../components/AdPlaceholder';
+import { BannerAd } from '../components/BannerAd';
 import { MANDI_PRICES, BLOG_POSTS } from '../constants';
 import { fetchMandiPrices } from '../services/mandiService';
 import { fetchCurrentWeather, WeatherData } from '../services/weatherService';
@@ -28,14 +28,20 @@ export const Home: React.FC = () => {
   const [weather, setWeather] = React.useState<WeatherData | null>(null);
   const [loadingWeather, setLoadingWeather] = React.useState(false);
 
-  const GOV_API_KEY = process.env.VITE_GOV_DATA_API_KEY;
-  const WEATHER_API_KEY = process.env.VITE_OPENWEATHER_API_KEY;
+  const GOV_API_KEY = import.meta.env.VITE_GOV_DATA_API_KEY;
+  const WEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
   React.useEffect(() => {
     if (GOV_API_KEY) {
       setLoadingMandi(true);
       fetchMandiPrices(undefined, undefined, undefined, 4)
-        .then(data => setMandiPreview(data))
+        .then(data => {
+          if (data && data.length > 0) {
+            setMandiPreview(data);
+          } else {
+            setMandiPreview(MANDI_PRICES.slice(0, 4));
+          }
+        })
         .catch(() => setMandiPreview(MANDI_PRICES.slice(0, 4)))
         .finally(() => setLoadingMandi(false));
     }
@@ -51,6 +57,7 @@ export const Home: React.FC = () => {
 
   return (
     <div className="space-y-12">
+      <BannerAd />
       {/* Hero Section */}
       <section className="relative rounded-3xl overflow-hidden bg-emerald-800 text-white p-8 md:p-16">
         <div className="relative z-10 max-w-2xl">
@@ -80,8 +87,6 @@ export const Home: React.FC = () => {
           />
         </div>
       </section>
-
-      <AdPlaceholder slot="home-top" adSlotId="4738815888" className="my-8" />
 
       {/* Features Grid */}
       <section>
@@ -151,7 +156,6 @@ export const Home: React.FC = () => {
               </tbody>
             </table>
           </div>
-          <AdPlaceholder slot="home-mandi-bottom" adSlotId="2259291506" />
         </div>
 
         {/* Sidebar Weather & Updates */}
@@ -220,10 +224,8 @@ export const Home: React.FC = () => {
               ))}
             </div>
           </div>
-          <AdPlaceholder slot="home-sidebar" adSlotId="2259291506" format="rectangle" />
         </div>
       </div>
-      <AdPlaceholder slot="home-bottom" adSlotId="2259291506" className="mt-8" />
     </div>
   );
 };

@@ -56,8 +56,19 @@ export const fetchCurrentWeather = async (lat?: number, lon?: number, city?: str
 
   const response = await fetch(url.toString());
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to fetch weather');
+    let errorMessage = `Failed to fetch weather (${response.status})`;
+    try {
+      const error = await response.json();
+      errorMessage = error.message || errorMessage;
+    } catch (e) {
+      const text = await response.text().catch(() => '');
+      if (text.includes('The page could not be found') || text.includes('404')) {
+        errorMessage = 'Weather API endpoint not found (404). Please check deployment.';
+      } else if (text.length > 0) {
+        errorMessage = `Server error: ${text.substring(0, 100)}...`;
+      }
+    }
+    throw new Error(errorMessage);
   }
   return response.json();
 };
@@ -75,8 +86,19 @@ export const fetchForecast = async (lat?: number, lon?: number, city?: string): 
 
   const response = await fetch(url.toString());
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to fetch forecast');
+    let errorMessage = `Failed to fetch forecast (${response.status})`;
+    try {
+      const error = await response.json();
+      errorMessage = error.message || errorMessage;
+    } catch (e) {
+      const text = await response.text().catch(() => '');
+      if (text.includes('The page could not be found') || text.includes('404')) {
+        errorMessage = 'Forecast API endpoint not found (404). Please check deployment.';
+      } else if (text.length > 0) {
+        errorMessage = `Server error: ${text.substring(0, 100)}...`;
+      }
+    }
+    throw new Error(errorMessage);
   }
   return response.json();
 };

@@ -6,7 +6,6 @@
 import React from 'react';
 import { Lightbulb, TrendingUp, AlertTriangle, DollarSign } from 'lucide-react';
 import { BUSINESS_IDEAS } from '../constants';
-import { AdPlaceholder } from '../components/AdPlaceholder';
 
 export const BusinessIdeas: React.FC = () => {
   return (
@@ -15,8 +14,6 @@ export const BusinessIdeas: React.FC = () => {
         <h1 className="text-3xl font-bold mb-4">Farming Business Ideas</h1>
         <p className="text-stone-600">Explore high-profit agricultural ventures with low to medium investment.</p>
       </div>
-
-      <AdPlaceholder slot="business-top" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {BUSINESS_IDEAS.map((idea) => (
@@ -61,8 +58,6 @@ export const BusinessIdeas: React.FC = () => {
           </div>
         ))}
       </div>
-
-      <AdPlaceholder slot="business-bottom" />
     </div>
   );
 };

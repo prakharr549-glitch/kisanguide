@@ -7,7 +7,6 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, Tag, ArrowLeft, Share2 } from 'lucide-react';
 import { BLOG_POSTS } from '../constants';
-import { AdPlaceholder } from '../components/AdPlaceholder';
 
 export const BlogDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -46,13 +45,9 @@ export const BlogDetail: React.FC = () => {
             {post.title}
           </h1>
 
-          <AdPlaceholder slot="blog-detail-top" />
-
           <div className="prose prose-emerald max-w-none text-stone-700 leading-relaxed whitespace-pre-line">
             {post.content}
           </div>
-
-          <AdPlaceholder slot="blog-detail-bottom" />
         </div>
       </article>
 
