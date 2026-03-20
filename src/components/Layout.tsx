@@ -8,6 +8,10 @@ import { Link, useLocation } from 'react-router-dom';
 import { Sprout, Calculator, TrendingUp, ShieldAlert, FileText, Calendar, Lightbulb, Menu, X, Cloud } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import { SocialAd } from './SocialAd';
+import { StickyFooterAd } from './StickyFooterAd';
+import { BannerAd } from './BannerAd';
+import { BottomAd } from './BottomAd';
 
 const navItems = [
   { name: 'Home', path: '/', icon: Sprout },
@@ -99,7 +103,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
+        <BottomAd />
       </main>
+
+      <div className="hidden md:block">
+        <BannerAd />
+      </div>
 
       {/* Footer */}
       <footer className="bg-emerald-900 text-emerald-50 py-12 mt-auto">
@@ -144,12 +153,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         </div>
       </footer>
 
-      {/* Sticky Mobile Footer Ad */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white border-t border-stone-200 p-1">
-        <div className="h-12 flex items-center justify-center bg-stone-100 rounded text-[10px] text-stone-400">
-          Mobile Sticky Ad Slot
-        </div>
-      </div>
+      <StickyFooterAd />
+      <SocialAd />
     </div>
   );
 };

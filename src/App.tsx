@@ -5,6 +5,7 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import { NotificationManager } from './components/NotificationManager';
 import { Home } from './pages/Home';
 import { Calculators } from './pages/Calculators';
 import { MandiPrices } from './pages/MandiPrices';
@@ -21,6 +22,7 @@ export default function App() {
   return (
     <Router>
       <Layout>
+        <NotificationManager />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/calculators" element={<Calculators />} />
