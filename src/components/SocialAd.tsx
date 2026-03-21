@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 export const SocialAd: React.FC = () => {
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = 'https://pl28951109.profitablecpmratenetwork.com/fb/63/d5/fb63d58f8c91af5427a9c34099be8ace.js';
+    script.src = 'https://www.highperformanceformat.com/7dd7b97e9b031833d7d0628b50bfc596/invoke.js';
     script.async = true;
     document.body.appendChild(script);
 
