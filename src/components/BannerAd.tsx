@@ -25,7 +25,7 @@ export const BannerAd: React.FC = () => {
       
       const scriptInvoke = document.createElement('script');
       scriptInvoke.type = 'text/javascript';
-      scriptInvoke.src = "https://pl28953359.profitablecpmratenetwork.com/d2/48/73/d24873c6a8c5c101a1c1dc6a168fefee.js";
+      scriptInvoke.src = "https://www.highperformanceformat.com/ade34d097a6918ed62a0e3a911f0a623/invoke.js";
 
       adRef.current.appendChild(scriptConfig);
       adRef.current.appendChild(scriptInvoke);
