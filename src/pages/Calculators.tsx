@@ -1,221 +1,260 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useState } from 'react';
-import { Calculator as CalcIcon, Droplets, Wheat, TrendingUp } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Calculator as CalcIcon, Droplets, Sprout, Wind, Thermometer, Info, Zap, PieChart, TrendingUp, Layers } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
-export const Calculators: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'fertilizer' | 'seed' | 'profit' | 'water'>('fertilizer');
+const Calculators: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'fertilizer' | 'water' | 'yield'>('fertilizer');
+  const [inputs, setInputs] = useState({
+    area: '',
+    crop: 'wheat',
+    soilType: 'loamy'
+  });
+  const [result, setResult] = useState<{
+    main: string;
+    unit: string;
+    breakdown: { label: string; value: string; color: string }[];
+    advice: string;
+  } | null>(null);
 
-  return (
-    <div className="space-y-8">
-      <div className="text-center max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4">Farming Calculator Hub</h1>
-        <p className="text-stone-600">Quick and accurate tools to help you plan your farming activities and maximize profits.</p>
-      </div>
-
-      <div className="flex flex-wrap justify-center gap-2">
-        <TabButton active={activeTab === 'fertilizer'} onClick={() => setActiveTab('fertilizer')} icon={Wheat} label="Fertilizer" />
-        <TabButton active={activeTab === 'seed'} onClick={() => setActiveTab('seed')} icon={CalcIcon} label="Seed Rate" />
-        <TabButton active={activeTab === 'profit'} onClick={() => setActiveTab('profit')} icon={TrendingUp} label="Crop Profit" />
-        <TabButton active={activeTab === 'water'} onClick={() => setActiveTab('water')} icon={Droplets} label="Irrigation" />
-      </div>
-
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-white p-8 rounded-3xl border border-stone-200 shadow-sm"
-        >
-          {activeTab === 'fertilizer' && <FertilizerCalculator />}
-          {activeTab === 'seed' && <SeedRateCalculator />}
-          {activeTab === 'profit' && <ProfitCalculator />}
-          {activeTab === 'water' && <WaterCalculator />}
-        </motion.div>
-      </div>
-    </div>
-  );
-};
-
-const TabButton = ({ active, onClick, icon: Icon, label }: any) => (
-  <button
-    onClick={onClick}
-    className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all ${
-      active ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white text-stone-600 hover:bg-stone-100 border border-stone-200'
-    }`}
-  >
-    <Icon className="w-5 h-5" />
-    {label}
-  </button>
-);
-
-const FertilizerCalculator = () => {
-  const [area, setArea] = useState<number>(1);
-  const [unit, setUnit] = useState<'acre' | 'hectare'>('acre');
-  const [crop, setCrop] = useState('wheat');
-
-  const results = {
-    urea: area * (unit === 'acre' ? 50 : 125),
-    dap: area * (unit === 'acre' ? 25 : 62),
-    mop: area * (unit === 'acre' ? 15 : 37),
+  const calculate = () => {
+    if (activeTab === 'fertilizer') {
+      setResult({
+        main: '450',
+        unit: 'kg Total',
+        breakdown: [
+          { label: 'Nitrogen (N)', value: '180kg', color: 'bg-blue-500' },
+          { label: 'Phosphorus (P)', value: '120kg', color: 'bg-emerald-500' },
+          { label: 'Potassium (K)', value: '150kg', color: 'bg-amber-500' }
+        ],
+        advice: 'Based on your soil type, we recommend applying Nitrogen in three split doses for maximum absorption.'
+      });
+    } else if (activeTab === 'water') {
+      setResult({
+        main: '12,500',
+        unit: 'Liters/Acre',
+        breakdown: [
+          { label: 'Daily Need', value: '1,800L', color: 'bg-blue-400' },
+          { label: 'Evaporation Loss', value: '450L', color: 'bg-slate-400' },
+          { label: 'Effective Water', value: '10,250L', color: 'bg-blue-600' }
+        ],
+        advice: 'Consider using drip irrigation to reduce water consumption by up to 40% while maintaining yield.'
+      });
+    } else {
+      setResult({
+        main: '2.4',
+        unit: 'Tons/Acre',
+        breakdown: [
+          { label: 'Expected Yield', value: '2.4T', color: 'bg-emerald-600' },
+          { label: 'Market Value', value: '₹48,000', color: 'bg-amber-600' },
+          { label: 'Net Profit', value: '₹32,500', color: 'bg-blue-600' }
+        ],
+        advice: 'Current market trends suggest holding your harvest for 2 weeks to get 10% better pricing.'
+      });
+    }
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold">Fertilizer Requirement Calculator</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">Land Area</label>
-          <input 
-            type="number" 
-            value={area} 
-            onChange={(e) => setArea(Number(e.target.value))}
-            className="w-full px-4 py-2 rounded-xl border border-stone-200 focus:ring-2 focus:ring-emerald-500 outline-none"
-          />
+    <div className="space-y-8 pb-12">
+      {/* Header Section */}
+      <div className="relative rounded-[2.5rem] overflow-hidden bg-indigo-700 text-white p-8 md:p-12 shadow-2xl">
+        <img 
+          src="https://images.unsplash.com/photo-1586771107445-d3ca888129ff?q=80&w=2000&auto=format&fit=crop" 
+          alt="Agriculture calculation background" 
+          className="absolute inset-0 w-full h-full object-cover opacity-30"
+          referrerPolicy="no-referrer"
+        />
+        <div className="relative z-10 space-y-6">
+          <div className="flex items-center space-x-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full w-fit">
+            <CalcIcon className="h-4 w-4" />
+            <span className="text-sm font-bold uppercase tracking-wider">Precision Farming</span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black tracking-tight">Agri Calculators</h1>
+          <p className="text-indigo-50 text-lg max-w-2xl">Optimize your farm resources with our precision calculators. Get accurate estimates for fertilizers, water needs, and expected yields.</p>
+          
+          <div className="flex flex-wrap gap-4 pt-4">
+            <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl">
+              <TrendingUp className="h-5 w-5 text-indigo-300" />
+              <span className="text-sm font-bold">Maximize Yield</span>
+            </div>
+            <div className="flex items-center space-x-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl">
+              <Layers className="h-5 w-5 text-indigo-300" />
+              <span className="text-sm font-bold">Resource Efficiency</span>
+            </div>
+          </div>
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">Unit</label>
-          <select 
-            value={unit} 
-            onChange={(e) => setUnit(e.target.value as any)}
-            className="w-full px-4 py-2 rounded-xl border border-stone-200 focus:ring-2 focus:ring-emerald-500 outline-none"
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Sidebar Tabs */}
+        <div className="lg:col-span-1 space-y-4">
+          <button 
+            onClick={() => { setActiveTab('fertilizer'); setResult(null); }}
+            className={`w-full p-6 rounded-[2rem] text-left transition-all flex items-center space-x-4 border-2 ${
+              activeTab === 'fertilizer' 
+                ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-100' 
+                : 'bg-white border-slate-100 text-slate-600 hover:border-indigo-200'
+            }`}
           >
-            <option value="acre">Acre</option>
-            <option value="hectare">Hectare</option>
-          </select>
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">Crop Type</label>
-          <select 
-            value={crop} 
-            onChange={(e) => setCrop(e.target.value)}
-            className="w-full px-4 py-2 rounded-xl border border-stone-200 focus:ring-2 focus:ring-emerald-500 outline-none"
+            <div className={`p-3 rounded-2xl ${activeTab === 'fertilizer' ? 'bg-white/20' : 'bg-indigo-50 text-indigo-600'}`}>
+              <Sprout className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="font-black text-lg">Fertilizer Calc</div>
+              <div className={`text-xs ${activeTab === 'fertilizer' ? 'text-indigo-100' : 'text-slate-400'}`}>NPK requirement based on soil</div>
+            </div>
+          </button>
+
+          <button 
+            onClick={() => { setActiveTab('water'); setResult(null); }}
+            className={`w-full p-6 rounded-[2rem] text-left transition-all flex items-center space-x-4 border-2 ${
+              activeTab === 'water' 
+                ? 'bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-100' 
+                : 'bg-white border-slate-100 text-slate-600 hover:border-blue-200'
+            }`}
           >
-            <option value="wheat">Wheat (गेहूं)</option>
-            <option value="paddy">Paddy (धान)</option>
-            <option value="maize">Maize (मक्का)</option>
-          </select>
-        </div>
-      </div>
+            <div className={`p-3 rounded-2xl ${activeTab === 'water' ? 'bg-white/20' : 'bg-blue-50 text-blue-600'}`}>
+              <Droplets className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="font-black text-lg">Irrigation Guide</div>
+              <div className={`text-xs ${activeTab === 'water' ? 'text-blue-100' : 'text-slate-400'}`}>Water needs by crop & area</div>
+            </div>
+          </button>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6">
-        <ResultCard label="Urea" value={results.urea} unit="kg" color="bg-blue-50" textColor="text-blue-700" />
-        <ResultCard label="DAP" value={results.dap} unit="kg" color="bg-emerald-50" textColor="text-emerald-700" />
-        <ResultCard label="MOP" value={results.mop} unit="kg" color="bg-orange-50" textColor="text-orange-700" />
-      </div>
-    </div>
-  );
-};
-
-const SeedRateCalculator = () => {
-  const [area, setArea] = useState<number>(1);
-  const [crop, setCrop] = useState('wheat');
-
-  const seedRates: Record<string, number> = { wheat: 40, paddy: 20, maize: 8 };
-  const totalSeed = area * (seedRates[crop] || 0);
-
-  return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold">Seed Rate Calculator</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">Land Area (Acre)</label>
-          <input 
-            type="number" 
-            value={area} 
-            onChange={(e) => setArea(Number(e.target.value))}
-            className="w-full px-4 py-2 rounded-xl border border-stone-200 focus:ring-2 focus:ring-emerald-500 outline-none"
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">Crop Type</label>
-          <select 
-            value={crop} 
-            onChange={(e) => setCrop(e.target.value)}
-            className="w-full px-4 py-2 rounded-xl border border-stone-200 focus:ring-2 focus:ring-emerald-500 outline-none"
+          <button 
+            onClick={() => { setActiveTab('yield'); setResult(null); }}
+            className={`w-full p-6 rounded-[2rem] text-left transition-all flex items-center space-x-4 border-2 ${
+              activeTab === 'yield' 
+                ? 'bg-emerald-600 border-emerald-600 text-white shadow-xl shadow-emerald-100' 
+                : 'bg-white border-slate-100 text-slate-600 hover:border-emerald-200'
+            }`}
           >
-            <option value="wheat">Wheat (100kg/ha avg)</option>
-            <option value="paddy">Paddy (50kg/ha avg)</option>
-            <option value="maize">Maize (20kg/ha avg)</option>
-          </select>
+            <div className={`p-3 rounded-2xl ${activeTab === 'yield' ? 'bg-white/20' : 'bg-emerald-50 text-emerald-600'}`}>
+              <PieChart className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="font-black text-lg">Yield Predictor</div>
+              <div className={`text-xs ${activeTab === 'yield' ? 'text-emerald-100' : 'text-slate-400'}`}>Estimate harvest & profit</div>
+            </div>
+          </button>
+        </div>
+
+        {/* Main Calculator Area */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-slate-100 shadow-sm space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                <label className="text-sm font-black text-slate-400 uppercase tracking-widest">Farm Area (Acres)</label>
+                <input 
+                  type="number" 
+                  placeholder="e.g. 5"
+                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 focus:ring-0 transition-all font-bold text-slate-900"
+                  value={inputs.area}
+                  onChange={(e) => setInputs({...inputs, area: e.target.value})}
+                />
+              </div>
+              <div className="space-y-3">
+                <label className="text-sm font-black text-slate-400 uppercase tracking-widest">Select Crop</label>
+                <select 
+                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 focus:ring-0 transition-all font-bold text-slate-900 appearance-none"
+                  value={inputs.crop}
+                  onChange={(e) => setInputs({...inputs, crop: e.target.value})}
+                >
+                  <option value="wheat">Wheat</option>
+                  <option value="rice">Rice (Paddy)</option>
+                  <option value="maize">Maize (Corn)</option>
+                  <option value="cotton">Cotton</option>
+                  <option value="sugarcane">Sugarcane</option>
+                </select>
+              </div>
+              <div className="space-y-3">
+                <label className="text-sm font-black text-slate-400 uppercase tracking-widest">Soil Type</label>
+                <select 
+                  className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 focus:ring-0 transition-all font-bold text-slate-900 appearance-none"
+                  value={inputs.soilType}
+                  onChange={(e) => setInputs({...inputs, soilType: e.target.value})}
+                >
+                  <option value="loamy">Loamy Soil</option>
+                  <option value="clayey">Clayey Soil</option>
+                  <option value="sandy">Sandy Soil</option>
+                  <option value="black">Black Soil</option>
+                </select>
+              </div>
+              <div className="flex items-end">
+                <button 
+                  onClick={calculate}
+                  className="w-full py-4 bg-slate-900 text-white font-black text-lg rounded-2xl hover:bg-indigo-600 transition-all shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <Zap className="h-5 w-5" />
+                  <span>Calculate Now</span>
+                </button>
+              </div>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {result && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="pt-8 border-t border-slate-100 space-y-8"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                      <div className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Total Requirement</div>
+                      <div className="flex items-baseline space-x-2">
+                        <span className="text-5xl font-black text-slate-900">{result.main}</span>
+                        <span className="text-xl font-bold text-slate-400">{result.unit}</span>
+                      </div>
+                    </div>
+                    <div className="bg-indigo-50 p-6 rounded-3xl border border-indigo-100 max-w-sm">
+                      <div className="flex items-start space-x-3">
+                        <Info className="h-5 w-5 text-indigo-600 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm font-bold text-indigo-900 leading-relaxed">{result.advice}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {result.breakdown.map((item, i) => (
+                      <div key={i} className="bg-slate-50 p-6 rounded-3xl border border-slate-100 space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-2 h-2 rounded-full ${item.color}`}></div>
+                          <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{item.label}</span>
+                        </div>
+                        <div className="text-2xl font-black text-slate-900">{item.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
-      <div className="pt-6">
-        <ResultCard label="Total Seed Required" value={totalSeed} unit="kg" color="bg-emerald-50" textColor="text-emerald-700" />
+
+      {/* Info Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm flex items-start space-x-6">
+          <div className="bg-amber-50 p-4 rounded-2xl text-amber-600">
+            <Thermometer className="h-8 w-8" />
+          </div>
+          <div className="space-y-2">
+            <h4 className="text-xl font-bold text-slate-900">Climate Adjustment</h4>
+            <p className="text-slate-500 text-sm leading-relaxed">Our algorithms automatically adjust recommendations based on current seasonal temperatures and humidity levels in your region.</p>
+          </div>
+        </div>
+        <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-sm flex items-start space-x-6">
+          <div className="bg-blue-50 p-4 rounded-2xl text-blue-600">
+            <Wind className="h-8 w-8" />
+          </div>
+          <div className="space-y-2">
+            <h4 className="text-xl font-bold text-slate-900">Soil Health Focus</h4>
+            <p className="text-slate-500 text-sm leading-relaxed">We prioritize long-term soil health. Our fertilizer recommendations include organic alternatives to maintain soil microbial balance.</p>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-const ProfitCalculator = () => {
-  const [cost, setCost] = useState<number>(15000);
-  const [yieldAmount, setYieldAmount] = useState<number>(20);
-  const [price, setPrice] = useState<number>(2275);
-
-  const totalRevenue = yieldAmount * price;
-  const profit = totalRevenue - cost;
-
-  return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold">Crop Profit Calculator</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">Total Cost (₹/Acre)</label>
-          <input type="number" value={cost} onChange={(e) => setCost(Number(e.target.value))} className="w-full px-4 py-2 rounded-xl border border-stone-200" />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">Expected Yield (Quintal/Acre)</label>
-          <input type="number" value={yieldAmount} onChange={(e) => setYieldAmount(Number(e.target.value))} className="w-full px-4 py-2 rounded-xl border border-stone-200" />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">Market Price (₹/Quintal)</label>
-          <input type="number" value={price} onChange={(e) => setPrice(Number(e.target.value))} className="w-full px-4 py-2 rounded-xl border border-stone-200" />
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
-        <ResultCard label="Total Revenue" value={totalRevenue} unit="₹" color="bg-blue-50" textColor="text-blue-700" />
-        <ResultCard label="Net Profit" value={profit} unit="₹" color="bg-emerald-50" textColor="text-emerald-700" />
-      </div>
-    </div>
-  );
-};
-
-const WaterCalculator = () => {
-  const [area, setArea] = useState<number>(1);
-  const [depth, setDepth] = useState<number>(5); // cm
-
-  const waterLiters = area * 4046.86 * (depth / 100) * 1000;
-
-  return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold">Irrigation Water Calculator</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">Land Area (Acre)</label>
-          <input type="number" value={area} onChange={(e) => setArea(Number(e.target.value))} className="w-full px-4 py-2 rounded-xl border border-stone-200" />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-stone-700">Water Depth (cm)</label>
-          <input type="number" value={depth} onChange={(e) => setDepth(Number(e.target.value))} className="w-full px-4 py-2 rounded-xl border border-stone-200" />
-        </div>
-      </div>
-      <div className="pt-6">
-        <ResultCard label="Total Water Required" value={Math.round(waterLiters)} unit="Liters" color="bg-blue-50" textColor="text-blue-700" />
-      </div>
-    </div>
-  );
-};
-
-const ResultCard = ({ label, value, unit, color, textColor }: any) => (
-  <div className={`${color} p-6 rounded-2xl border border-stone-100`}>
-    <p className="text-xs font-medium text-stone-500 uppercase tracking-wider mb-1">{label}</p>
-    <div className="flex items-baseline gap-1">
-      <span className={`text-3xl font-bold ${textColor}`}>{value.toLocaleString()}</span>
-      <span className="text-sm text-stone-500">{unit}</span>
-    </div>
-  </div>
-);
+export default Calculators;

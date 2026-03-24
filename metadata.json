@@ -1,5 +1,5 @@
 {
-  "name": "KisanGuide - Your Farming Partner",
-  "description": "A comprehensive agriculture platform providing farming calculators, mandi prices, disease identification, government schemes, and seasonal crop guides to empower Indian farmers.",
-  "requestFramePermissions": []
+  "name": "KisanGuide",
+  "description": "Comprehensive agriculture app for farmers providing mandi prices, weather, crop guide, and more.",
+  "requestFramePermissions": ["geolocation"]
 }

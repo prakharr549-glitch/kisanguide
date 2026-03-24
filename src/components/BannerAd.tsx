@@ -1,21 +1,16 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useEffect, useRef } from 'react';
 
 export const BannerAd: React.FC = () => {
   const adRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Prevent double injection in dev mode
-    if (adRef.current && adRef.current.childNodes.length === 0) {
-      const scriptConfig = document.createElement('script');
-      scriptConfig.type = 'text/javascript';
-      scriptConfig.innerHTML = `
+    if (adRef.current) {
+      adRef.current.innerHTML = '';
+      const conf = document.createElement('script');
+      conf.type = 'text/javascript';
+      conf.innerHTML = `
         atOptions = {
-          'key' : '7dd7b97e9b031833d7d0628b50bfc596',
+          'key' : 'ade34d097a6918ed62a0e3a911f0a623',
           'format' : 'iframe',
           'height' : 90,
           'width' : 728,
@@ -23,18 +18,23 @@ export const BannerAd: React.FC = () => {
         };
       `;
       
-      const scriptInvoke = document.createElement('script');
-      scriptInvoke.type = 'text/javascript';
-      scriptInvoke.src = "https://www.highperformanceformat.com/ade34d097a6918ed62a0e3a911f0a623/invoke.js";
-
-      adRef.current.appendChild(scriptConfig);
-      adRef.current.appendChild(scriptInvoke);
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = 'https://www.highperformanceformat.com/ade34d097a6918ed62a0e3a911f0a623/invoke.js';
+      
+      adRef.current.appendChild(conf);
+      adRef.current.appendChild(script);
     }
   }, []);
 
   return (
-    <div className="flex justify-center my-4 overflow-hidden min-h-[90px]">
-      <div ref={adRef} />
+    <div className="flex justify-center my-8 w-full overflow-hidden">
+      <div 
+        ref={adRef} 
+        className="min-h-[90px] w-full max-w-[728px] bg-slate-50 rounded-lg flex items-center justify-center text-[10px] text-slate-300 uppercase tracking-[0.2em] font-bold border border-dashed border-slate-200"
+      >
+        Advertisement
+      </div>
     </div>
   );
 };

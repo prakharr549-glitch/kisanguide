@@ -1,39 +1,40 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useEffect, useRef } from 'react';
 
 export const BottomAd: React.FC = () => {
   const adRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (adRef.current && adRef.current.childNodes.length === 0) {
-      const scriptConfig = document.createElement('script');
-      scriptConfig.type = 'text/javascript';
-      scriptConfig.innerHTML = `
+    if (adRef.current) {
+      adRef.current.innerHTML = '';
+      const conf = document.createElement('script');
+      conf.type = 'text/javascript';
+      conf.innerHTML = `
         atOptions = {
-          'key' : '0372236b718cbdebc2d787a22c89f24c',
+          'key' : 'ade34d097a6918ed62a0e3a911f0a623',
           'format' : 'iframe',
-          'height' : 600,
-          'width' : 160,
+          'height' : 90,
+          'width' : 728,
           'params' : {}
         };
       `;
       
-      const scriptInvoke = document.createElement('script');
-      scriptInvoke.type = 'text/javascript';
-      scriptInvoke.src = "https://www.highperformanceformat.com/0372236b718cbdebc2d787a22c89f24c/invoke.js";
-
-      adRef.current.appendChild(scriptConfig);
-      adRef.current.appendChild(scriptInvoke);
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = 'https://www.highperformanceformat.com/ade34d097a6918ed62a0e3a911f0a623/invoke.js';
+      
+      adRef.current.appendChild(conf);
+      adRef.current.appendChild(script);
     }
   }, []);
 
   return (
-    <div className="flex justify-center my-8 overflow-hidden min-h-[600px]">
-      <div ref={adRef} />
+    <div className="hidden lg:block sticky top-24 ml-8 overflow-hidden">
+      <div 
+        ref={adRef} 
+        className="min-h-[90px] w-[728px] bg-slate-50 rounded-lg flex items-center justify-center text-[10px] text-slate-300 uppercase tracking-[0.2em] font-bold border border-dashed border-slate-200"
+      >
+        Advertisement
+      </div>
     </div>
   );
 };

@@ -8,17 +8,16 @@ import React, { useEffect } from 'react';
 export const SocialAd: React.FC = () => {
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = 'https://www.highperformanceformat.com/7dd7b97e9b031833d7d0628b50bfc596/invoke.js';
+    script.src = 'https://pl28953359.profitablecpmratenetwork.com/d2/48/73/d24873c6a8c5c101a1c1dc6a168fefee.js';
     script.async = true;
     document.body.appendChild(script);
 
     return () => {
-      // Cleanup if needed, though usually these scripts stay
       if (document.body.contains(script)) {
         document.body.removeChild(script);
       }
     };
   }, []);
 
-  return null; // This component doesn't render anything itself
+  return null; // The script handles its own rendering (Social Bar)
 };
