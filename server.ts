@@ -50,6 +50,43 @@ async function startServer() {
     }
   });
 
+  // API Route to search for crops using Perenual
+  app.get("/api/search-crops", async (req, res) => {
+    try {
+      const { q, page } = req.query;
+      const apiKey = process.env.VITE_PERENUAL_API_KEY || 'sk-kYxe69c15823cd04615715';
+
+      const response = await axios.get(`https://perenual.com/api/species-list?key=${apiKey}`, {
+        params: { q, page: page || 1 },
+        timeout: 15000
+      });
+
+      res.json(response.data);
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError;
+      console.error('Perenual Search API Error:', axiosError.message);
+      res.status(axiosError.response?.status || 500).json({ error: "Failed to fetch crops" });
+    }
+  });
+
+  // API Route to get crop details using Perenual
+  app.get("/api/crop-details/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const apiKey = process.env.VITE_PERENUAL_API_KEY || 'sk-kYxe69c15823cd04615715';
+
+      const response = await axios.get(`https://perenual.com/api/species/details/${id}?key=${apiKey}`, {
+        timeout: 15000
+      });
+
+      res.json(response.data);
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError;
+      console.error('Perenual Details API Error:', axiosError.message);
+      res.status(axiosError.response?.status || 500).json({ error: "Failed to fetch crop details" });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
