@@ -39,6 +39,18 @@ interface CropDetails extends Crop {
   indoor: boolean;
 }
 
+interface CareGuide {
+  id: number;
+  species_id: number;
+  common_name: string;
+  scientific_name: string[];
+  section: {
+    id: number;
+    type: string;
+    description: string;
+  }[];
+}
+
 const CropGuide: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [crops, setCrops] = useState<Crop[]>([]);
@@ -46,6 +58,7 @@ const CropGuide: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedCropId, setSelectedCropId] = useState<number | null>(null);
   const [cropDetails, setCropDetails] = useState<CropDetails | null>(null);
+  const [careGuide, setCareGuide] = useState<CareGuide | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
 
   const fetchCrops = useCallback(async (query: string = '') => {
@@ -78,12 +91,28 @@ const CropGuide: React.FC = () => {
   const fetchCropDetails = async (id: number) => {
     setDetailsLoading(true);
     setSelectedCropId(id);
+    setCareGuide(null);
+    setCropDetails(null);
     try {
-      const response = await fetch(`/api/crop-details/${id}`);
-      const data = await response.json();
-      setCropDetails(data);
-    } catch {
-      console.error('Failed to fetch crop details');
+      // Fetch details and care guide in parallel
+      const [detailsRes, careGuideRes] = await Promise.all([
+        fetch(`/api/crop-details/${id}`),
+        fetch(`/api/crop-care-guide/${id}`)
+      ]);
+      
+      if (!detailsRes.ok) throw new Error('Failed to fetch details');
+      
+      const detailsData = await detailsRes.json();
+      setCropDetails(detailsData);
+
+      if (careGuideRes.ok) {
+        const careGuideData = await careGuideRes.json();
+        if (careGuideData.data && careGuideData.data.length > 0) {
+          setCareGuide(careGuideData.data[0]);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch crop details:', err);
     } finally {
       setDetailsLoading(false);
     }
@@ -92,6 +121,7 @@ const CropGuide: React.FC = () => {
   const closeDetails = () => {
     setSelectedCropId(null);
     setCropDetails(null);
+    setCareGuide(null);
   };
 
   return (
@@ -142,14 +172,23 @@ const CropGuide: React.FC = () => {
       )}
 
       {/* Error State */}
-      {error && !loading && (
-        <div className="bg-red-50 border border-red-100 rounded-3xl p-8 text-center">
-          <p className="text-red-600 font-bold">{error}</p>
+      {(error || (!loading && crops.length === 0 && !searchQuery)) && (
+        <div className="bg-slate-50 border border-slate-100 rounded-3xl p-12 text-center space-y-4">
+          <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto shadow-sm">
+            <Info className="h-8 w-8 text-slate-400" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-slate-900 font-bold text-xl">{error || 'No crops found'}</p>
+            <p className="text-slate-500">Try searching for something else or check your connection.</p>
+          </div>
           <button 
-            onClick={() => fetchCrops()}
-            className="mt-4 text-red-700 underline font-medium"
+            onClick={() => {
+              setSearchQuery('');
+              fetchCrops();
+            }}
+            className="px-6 py-2 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all"
           >
-            Try reloading
+            Reset Search
           </button>
         </div>
       )}
@@ -252,19 +291,19 @@ const CropGuide: React.FC = () => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                       <div className="bg-slate-50 p-4 rounded-3xl space-y-1">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cycle</span>
-                        <p className="font-bold text-slate-800">{cropDetails.cycle}</p>
+                        <p className="font-bold text-slate-800">{cropDetails.cycle || 'N/A'}</p>
                       </div>
                       <div className="bg-slate-50 p-4 rounded-3xl space-y-1">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Watering</span>
-                        <p className="font-bold text-slate-800">{cropDetails.watering}</p>
+                        <p className="font-bold text-slate-800">{cropDetails.watering || 'N/A'}</p>
                       </div>
                       <div className="bg-slate-50 p-4 rounded-3xl space-y-1">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sunlight</span>
-                        <p className="font-bold text-slate-800">{cropDetails.sunlight?.join(', ')}</p>
+                        <p className="font-bold text-slate-800">{Array.isArray(cropDetails.sunlight) ? cropDetails.sunlight.join(', ') : 'N/A'}</p>
                       </div>
                       <div className="bg-slate-50 p-4 rounded-3xl space-y-1">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Care Level</span>
-                        <p className="font-bold text-slate-800">{cropDetails.care_level}</p>
+                        <p className="font-bold text-slate-800">{cropDetails.care_level || 'N/A'}</p>
                       </div>
                     </div>
 
@@ -273,7 +312,7 @@ const CropGuide: React.FC = () => {
                         <Info className="h-6 w-6 mr-2 text-emerald-600" /> About this Crop
                       </h3>
                       <p className="text-slate-600 leading-relaxed text-lg">
-                        {cropDetails.description || `The ${cropDetails.common_name} (${cropDetails.scientific_name?.[0]}) is a ${cropDetails.cycle} plant known for its ${cropDetails.watering.toLowerCase()} watering needs and preference for ${cropDetails.sunlight?.join(' and ').toLowerCase()}. It has a ${cropDetails.growth_rate.toLowerCase()} growth rate and is considered ${cropDetails.care_level.toLowerCase()} to care for.`}
+                        {cropDetails.description || `The ${cropDetails.common_name || 'this plant'} (${cropDetails.scientific_name?.[0] || 'N/A'}) is a ${cropDetails.cycle || 'N/A'} plant known for its ${(cropDetails.watering || 'regular').toLowerCase()} watering needs and preference for ${Array.isArray(cropDetails.sunlight) ? cropDetails.sunlight.join(' and ').toLowerCase() : 'N/A'}. It has a ${(cropDetails.growth_rate || 'moderate').toLowerCase()} growth rate and is considered ${(cropDetails.care_level || 'moderate').toLowerCase()} to care for.`}
                       </p>
                     </div>
 
@@ -283,15 +322,15 @@ const CropGuide: React.FC = () => {
                         <ul className="space-y-3">
                           <li className="flex items-center text-slate-600">
                             <ChevronRight className="h-4 w-4 mr-2 text-emerald-500" />
-                            <span className="font-medium">Propagation: {cropDetails.propagation?.join(', ')}</span>
+                            <span className="font-medium">Propagation: {Array.isArray(cropDetails.propagation) ? cropDetails.propagation.join(', ') : 'N/A'}</span>
                           </li>
                           <li className="flex items-center text-slate-600">
                             <ChevronRight className="h-4 w-4 mr-2 text-emerald-500" />
-                            <span className="font-medium">Maintenance: {cropDetails.maintenance}</span>
+                            <span className="font-medium">Maintenance: {cropDetails.maintenance || 'N/A'}</span>
                           </li>
                           <li className="flex items-center text-slate-600">
                             <ChevronRight className="h-4 w-4 mr-2 text-emerald-500" />
-                            <span className="font-medium">Growth Rate: {cropDetails.growth_rate}</span>
+                            <span className="font-medium">Growth Rate: {cropDetails.growth_rate || 'N/A'}</span>
                           </li>
                         </ul>
                       </div>
@@ -306,9 +345,47 @@ const CropGuide: React.FC = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Care Guide Roadmap */}
+                    {careGuide && (
+                      <div className="space-y-6 pt-8 border-t border-slate-100">
+                        <h3 className="text-2xl font-bold text-slate-900 flex items-center">
+                          <Sprout className="h-6 w-6 mr-2 text-emerald-600" /> Cultivation Roadmap
+                        </h3>
+                        <div className="space-y-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-emerald-100">
+                          {careGuide.section.map((section, sIdx) => (
+                            <div key={section.id} className="relative pl-10">
+                              <div className="absolute left-0 top-1 w-6 h-6 bg-emerald-600 rounded-full flex items-center justify-center text-[10px] font-bold text-white z-10 shadow-sm">
+                                {sIdx + 1}
+                              </div>
+                              <div className="bg-slate-50 p-6 rounded-3xl space-y-2 hover:bg-emerald-50 transition-colors">
+                                <h4 className="text-lg font-bold text-emerald-800 capitalize">{section.type.replace('-', ' ')}</h4>
+                                <p className="text-slate-600 leading-relaxed">{section.description}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              ) : null}
+              ) : (
+                <div className="flex flex-col items-center justify-center py-40 space-y-6 px-8 text-center">
+                  <div className="bg-red-50 p-6 rounded-full">
+                    <X className="h-12 w-12 text-red-500" />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-bold text-slate-900">Failed to load details</h3>
+                    <p className="text-slate-500 max-w-md">We couldn't retrieve the full guide for this crop. This might be due to a network error or missing data in the database.</p>
+                  </div>
+                  <button 
+                    onClick={() => fetchCropDetails(selectedCropId!)}
+                    className="px-8 py-3 bg-emerald-600 text-white font-bold rounded-2xl hover:bg-emerald-700 transition-all shadow-lg"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              )}
             </motion.div>
           </div>
         )}

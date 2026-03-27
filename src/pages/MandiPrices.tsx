@@ -1,33 +1,57 @@
-import React, { useState, useMemo } from 'react';
-import { ShoppingBag, Search, ArrowUpRight, ArrowDownRight, TrendingUp, MapPin, Calendar, ChevronDown, Filter, Info } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ShoppingBag, Search, TrendingUp, MapPin, Calendar, ChevronDown, Filter, Info, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
-// Mock Mandi Data
-const mandiData = [
-  { id: 1, crop: 'Wheat', state: 'Punjab', mandi: 'Khanna', price: 2125, unit: 'Quintal', change: 1.2, trend: 'up' },
-  { id: 2, crop: 'Rice (Paddy)', state: 'Haryana', mandi: 'Karnal', price: 2040, unit: 'Quintal', change: -0.5, trend: 'down' },
-  { id: 3, crop: 'Mustard', state: 'Rajasthan', mandi: 'Alwar', price: 5450, unit: 'Quintal', change: 2.1, trend: 'up' },
-  { id: 4, crop: 'Cotton', state: 'Gujarat', mandi: 'Rajkot', price: 7200, unit: 'Quintal', change: 0.8, trend: 'up' },
-  { id: 5, crop: 'Onion', state: 'Maharashtra', mandi: 'Lasalgaon', price: 1850, unit: 'Quintal', change: -3.2, trend: 'down' },
-  { id: 6, crop: 'Potato', state: 'Uttar Pradesh', mandi: 'Agra', price: 1200, unit: 'Quintal', change: 0.0, trend: 'stable' },
-  { id: 7, crop: 'Soybean', state: 'Madhya Pradesh', mandi: 'Indore', price: 4800, unit: 'Quintal', change: 1.5, trend: 'up' },
-  { id: 8, crop: 'Tomato', state: 'Karnataka', mandi: 'Kolar', price: 2500, unit: 'Quintal', change: 5.4, trend: 'up' },
-];
+interface MandiRecord {
+  state: string;
+  district: string;
+  market: string;
+  commodity: string;
+  variety: string;
+  arrival_date: string;
+  min_price: string;
+  max_price: string;
+  modal_price: string;
+}
 
 const MandiPrices: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedState, setSelectedState] = useState('All States');
+  const [mandiRecords, setMandiRecords] = useState<MandiRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const states = ['All States', 'Punjab', 'Haryana', 'Rajasthan', 'Gujarat', 'Maharashtra', 'Uttar Pradesh', 'Madhya Pradesh', 'Karnataka'];
+  const states = ['All States', 'Punjab', 'Haryana', 'Rajasthan', 'Gujarat', 'Maharashtra', 'Uttar Pradesh', 'Madhya Pradesh', 'Karnataka', 'Tamil Nadu', 'Andhra Pradesh'];
 
-  const filteredData = useMemo(() => {
-    return mandiData.filter(item => {
-      const matchesSearch = item.crop.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                           item.mandi.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesState = selectedState === 'All States' || item.state === selectedState;
-      return matchesSearch && matchesState;
-    });
-  }, [searchQuery, selectedState]);
+  const fetchMandiPrices = useCallback(async (state: string = '') => {
+    setLoading(true);
+    setError(null);
+    try {
+      const stateParam = state && state !== 'All States' ? `&state=${state}` : '';
+      const response = await fetch(`/api/mandi-prices?${stateParam}`);
+      const data = await response.json();
+      if (data.records) {
+        setMandiRecords(data.records);
+      } else {
+        setError('No records found for the selected criteria.');
+      }
+    } catch {
+      setError('Failed to fetch Mandi prices.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchMandiPrices(selectedState);
+  }, [selectedState, fetchMandiPrices]);
+
+  const filteredData = mandiRecords.filter(item => {
+    const matchesSearch = item.commodity.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         item.market.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         item.district.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
+  });
 
   return (
     <div className="space-y-8 pb-12">
@@ -80,22 +104,22 @@ const MandiPrices: React.FC = () => {
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center space-x-4">
           <div className="bg-green-100 p-3 rounded-2xl text-green-600"><TrendingUp className="h-6 w-6" /></div>
           <div>
-            <div className="text-sm text-slate-500 font-bold uppercase tracking-wider">Top Gainer</div>
-            <div className="text-xl font-bold text-slate-900">Tomato (+5.4%)</div>
+            <div className="text-sm text-slate-500 font-bold uppercase tracking-wider">Status</div>
+            <div className="text-xl font-bold text-slate-900">Market Active</div>
           </div>
         </div>
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center space-x-4">
           <div className="bg-blue-100 p-3 rounded-2xl text-blue-600"><MapPin className="h-6 w-6" /></div>
           <div>
-            <div className="text-sm text-slate-500 font-bold uppercase tracking-wider">Active Mandis</div>
-            <div className="text-xl font-bold text-slate-900">1,248 Today</div>
+            <div className="text-sm text-slate-500 font-bold uppercase tracking-wider">Records</div>
+            <div className="text-xl font-bold text-slate-900">{mandiRecords.length} Mandis</div>
           </div>
         </div>
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center space-x-4">
           <div className="bg-amber-100 p-3 rounded-2xl text-amber-600"><Calendar className="h-6 w-6" /></div>
           <div>
             <div className="text-sm text-slate-500 font-bold uppercase tracking-wider">Last Updated</div>
-            <div className="text-xl font-bold text-slate-900">10 mins ago</div>
+            <div className="text-xl font-bold text-slate-900">Real-time</div>
           </div>
         </div>
       </div>
@@ -106,62 +130,69 @@ const MandiPrices: React.FC = () => {
           <h2 className="text-2xl font-bold text-slate-900">Live Market Rates</h2>
           <div className="text-sm text-slate-400 font-medium">Showing {filteredData.length} results</div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50">
-                <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Crop Name</th>
-                <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">State / Mandi</th>
-                <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Current Price</th>
-                <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Trend</th>
-                <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {filteredData.map((item, idx) => (
-                <motion.tr 
-                  key={item.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="hover:bg-slate-50 transition-colors group"
-                >
-                  <td className="px-8 py-6">
-                    <div className="font-bold text-slate-900 text-lg">{item.crop}</div>
-                    <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">Updated Today</div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="flex items-center text-slate-600 font-medium">
-                      <MapPin className="h-4 w-4 mr-2 text-slate-300" />
-                      {item.mandi}, {item.state}
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="text-xl font-black text-slate-900">₹{item.price.toLocaleString()}</div>
-                    <div className="text-xs text-slate-400 font-medium">per {item.unit}</div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
-                      item.trend === 'up' ? 'bg-green-100 text-green-700' : 
-                      item.trend === 'down' ? 'bg-red-100 text-red-700' : 
-                      'bg-slate-100 text-slate-600'
-                    }`}>
-                      {item.trend === 'up' ? <ArrowUpRight className="h-3 w-3 mr-1" /> : 
-                       item.trend === 'down' ? <ArrowDownRight className="h-3 w-3 mr-1" /> : null}
-                      {item.change}%
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <button className="text-green-600 font-bold text-sm hover:underline flex items-center group-hover:translate-x-1 transition-transform">
-                      View History <ArrowUpRight className="h-4 w-4 ml-1" />
-                    </button>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {filteredData.length === 0 && (
+        
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 space-y-4">
+            <Loader2 className="h-12 w-12 text-amber-600 animate-spin" />
+            <p className="text-slate-500 font-medium">Fetching live Mandi prices...</p>
+          </div>
+        ) : error ? (
+          <div className="p-20 text-center space-y-4">
+            <p className="text-red-600 font-bold">{error}</p>
+            <button onClick={() => fetchMandiPrices(selectedState)} className="text-amber-600 underline font-medium">Try again</button>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50">
+                  <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Crop Name</th>
+                  <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">District / Mandi</th>
+                  <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Modal Price</th>
+                  <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Range (Min-Max)</th>
+                  <th className="px-8 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Date</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {filteredData.map((item, idx) => (
+                  <motion.tr 
+                    key={idx}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="hover:bg-slate-50 transition-colors group"
+                  >
+                    <td className="px-8 py-6">
+                      <div className="font-bold text-slate-900 text-lg">{item.commodity}</div>
+                      <div className="text-xs text-slate-400 font-medium uppercase tracking-wider">{item.variety}</div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center text-slate-600 font-medium">
+                        <MapPin className="h-4 w-4 mr-2 text-slate-300" />
+                        {item.market}, {item.district}
+                      </div>
+                      <div className="text-xs text-slate-400">{item.state}</div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="text-xl font-black text-slate-900">₹{parseInt(item.modal_price).toLocaleString()}</div>
+                      <div className="text-xs text-slate-400 font-medium">per Quintal</div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="text-sm font-bold text-slate-600">
+                        ₹{parseInt(item.min_price).toLocaleString()} - ₹{parseInt(item.max_price).toLocaleString()}
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="text-sm text-slate-500">{item.arrival_date}</div>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {!loading && !error && filteredData.length === 0 && (
           <div className="p-20 text-center space-y-4">
             <div className="bg-slate-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
               <Search className="h-8 w-8 text-slate-400" />
